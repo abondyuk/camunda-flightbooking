@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" id="Definitions_0fr9mxs" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="4.12.0">
+  <bpmn:process id="flightbooking-process" isExecutable="true">
+    <bpmn:extensionElements>
+      <camunda:executionListener expression="$(reservationId)" event="start" />
+    </bpmn:extensionElements>
+    <bpmn:sequenceFlow id="Flow_07mx83t" sourceRef="Event_1td7o1a" targetRef="sendFinalConfirmationEmail" />
+    <bpmn:sequenceFlow id="Flow_0nh2ik6" sourceRef="Event_1fxabyb" targetRef="removeReservation" />
+    <bpmn:sequenceFlow id="Flow_03b737a" sourceRef="sendFinalConfirmationEmail" targetRef="EndEvent_0x6ir2l" />
+    <bpmn:serviceTask id="sendFinalConfirmationEmail" name="sendFinalConfirmationEmail" camunda:class="com.capbpm.flightbooking.task.SendFinalConfirmationEmailTask">
+      <bpmn:incoming>Flow_07mx83t</bpmn:incoming>
+      <bpmn:outgoing>Flow_03b737a</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:sequenceFlow id="SequenceFlow_1fp17al" sourceRef="StartEvent_1" targetRef="sendEmailForConfirmation" />
+    <bpmn:startEvent id="StartEvent_1" name="Flight Reservation Received">
+      <bpmn:outgoing>SequenceFlow_1fp17al</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_0weffvc" messageRef="Message_1k02ebh" />
+    </bpmn:startEvent>
+    <bpmn:endEvent id="EndEvent_0x6ir2l">
+      <bpmn:incoming>Flow_03b737a</bpmn:incoming>
+      <bpmn:incoming>Flow_1hdjsqz</bpmn:incoming>
+      <bpmn:terminateEventDefinition id="TerminateEventDefinition_1vm9mm2" />
+    </bpmn:endEvent>
+    <bpmn:sequenceFlow id="Flow_0iphzb8" sourceRef="removeReservation" targetRef="Activity_1o4psaa" />
+    <bpmn:sequenceFlow id="Flow_0vjegex" sourceRef="sendEmailForConfirmation" targetRef="Activity_1qze5w8" />
+    <bpmn:serviceTask id="sendEmailForConfirmation" name="sendEmailForConfirmation" camunda:class="com.capbpm.flightbooking.task.SendEmailForConfirmationTask">
+      <bpmn:incoming>SequenceFlow_1fp17al</bpmn:incoming>
+      <bpmn:outgoing>Flow_0vjegex</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:userTask id="Activity_1qze5w8">
+      <bpmn:incoming>Flow_0vjegex</bpmn:incoming>
+    </bpmn:userTask>
+    <bpmn:boundaryEvent id="Event_1fxabyb" name="Confirmation Expired" attachedToRef="Activity_1qze5w8">
+      <bpmn:outgoing>Flow_0nh2ik6</bpmn:outgoing>
+      <bpmn:timerEventDefinition id="TimerEventDefinition_1c3e19j">
+        <bpmn:timeDuration xsi:type="bpmn:tFormalExpression">PT1M</bpmn:timeDuration>
+      </bpmn:timerEventDefinition>
+    </bpmn:boundaryEvent>
+    <bpmn:serviceTask id="removeReservation" name="removeReservation" camunda:class="com.capbpm.flightbooking.task.RemoveReservationTask">
+      <bpmn:incoming>Flow_0nh2ik6</bpmn:incoming>
+      <bpmn:outgoing>Flow_0iphzb8</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_1o4psaa" name="Send Email about removal" camunda:class="com.capbpm.flightbooking.task.SendCancellationEmailTask">
+      <bpmn:incoming>Flow_0iphzb8</bpmn:incoming>
+      <bpmn:outgoing>Flow_1hdjsqz</bpmn:outgoing>
+    </bpmn:serviceTask>
+    <bpmn:boundaryEvent id="Event_1td7o1a" name="Confirmation Approved" attachedToRef="Activity_1qze5w8">
+      <bpmn:outgoing>Flow_07mx83t</bpmn:outgoing>
+      <bpmn:messageEventDefinition id="MessageEventDefinition_1kylcdb" messageRef="Message_0ening9" />
+    </bpmn:boundaryEvent>
+    <bpmn:sequenceFlow id="Flow_1hdjsqz" sourceRef="Activity_1o4psaa" targetRef="EndEvent_0x6ir2l" />
+  </bpmn:process>
+  <bpmn:message id="Message_0tlbvg5" />
+  <bpmn:message id="Message_0syjb95" />
+  <bpmn:message id="Message_0eo0sd9" name="reservationSendEvent" />
+  <bpmn:message id="Message_14fxgrb" name="Message_10tfmf8" />
+  <bpmn:message id="Message_09v7lek" />
+  <bpmn:message id="Message_1k02ebh" name="reservationSendEvent" />
+  <bpmn:message id="Message_0ening9" name="confirmationApproved" />
+  <bpmndi:BPMNDiagram id="BPMNDiagram_1">
+    <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="flightbooking-process">
+      <bpmndi:BPMNEdge id="Flow_1hdjsqz_di" bpmnElement="Flow_1hdjsqz">
+        <di:waypoint x="1100" y="390" />
+        <di:waypoint x="1320" y="390" />
+        <di:waypoint x="1320" y="137" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0vjegex_di" bpmnElement="Flow_0vjegex">
+        <di:waypoint x="420" y="197" />
+        <di:waypoint x="520" y="197" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0iphzb8_di" bpmnElement="Flow_0iphzb8">
+        <di:waypoint x="860" y="390" />
+        <di:waypoint x="1000" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1fp17al_di" bpmnElement="SequenceFlow_1fp17al">
+        <di:waypoint x="208" y="197" />
+        <di:waypoint x="320" y="197" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_03b737a_di" bpmnElement="Flow_03b737a">
+        <di:waypoint x="860" y="119" />
+        <di:waypoint x="1302" y="119" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_0nh2ik6_di" bpmnElement="Flow_0nh2ik6">
+        <di:waypoint x="580" y="255" />
+        <di:waypoint x="580" y="390" />
+        <di:waypoint x="760" y="390" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_07mx83t_di" bpmnElement="Flow_07mx83t">
+        <di:waypoint x="580" y="139" />
+        <di:waypoint x="580" y="119" />
+        <di:waypoint x="760" y="119" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="Activity_16sae46_di" bpmnElement="sendFinalConfirmationEmail">
+        <dc:Bounds x="760" y="79" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1vvtstq_di" bpmnElement="StartEvent_1">
+        <dc:Bounds x="172" y="179" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="161" y="222" width="59" height="40" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_1ea1y18_di" bpmnElement="EndEvent_0x6ir2l">
+        <dc:Bounds x="1302" y="101" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1wkw9mz_di" bpmnElement="sendEmailForConfirmation">
+        <dc:Bounds x="320" y="157" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_1r0mw30_di" bpmnElement="Activity_1qze5w8">
+        <dc:Bounds x="520" y="157" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_19pzajk_di" bpmnElement="removeReservation">
+        <dc:Bounds x="760" y="350" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_0lkm24q_di" bpmnElement="Activity_1o4psaa">
+        <dc:Bounds x="1000" y="350" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_11w7sua_di" bpmnElement="Event_1td7o1a">
+        <dc:Bounds x="562" y="139" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="548" y="101.5" width="63" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Event_0716lx5_di" bpmnElement="Event_1fxabyb">
+        <dc:Bounds x="562" y="219" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <dc:Bounds x="549" y="262" width="63" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</bpmn:definitions>

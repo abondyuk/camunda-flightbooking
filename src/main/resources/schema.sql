@@ -1,0 +1,10 @@
+DROP TABLE IF EXISTS reservations;
+CREATE TABLE reservations (
+  id LONG AUTO_INCREMENT  PRIMARY KEY,
+  firstName VARCHAR(50) NOT NULL,
+  lastName VARCHAR(50) NOT NULL,
+  email VARCHAR(24) NOT NULL,
+  travelInDate DATE NOT NULL,
+  countryFrom VARCHAR(24) NOT NULL,
+  countryTo VARCHAR(24) NOT NULL
+);
